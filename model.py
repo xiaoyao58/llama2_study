@@ -137,6 +137,59 @@ def repeat_kv(x: torch.Tensor, n_rep: int) -> torch.Tensor:
         .reshape(bs, slen, n_kv_heads * n_rep, head_dim)  # [bs, slen, n_kv_heads*n_rep, head_dim]
     )
 
+class CauchyActivation(nn.Module):
+    def __init__(self, neurons=768):
+        super(CauchyActivation, self).__init__()
+        self.lambda_1 = nn.Parameter(0.01 * torch.ones(neurons))
+        self.lambda_2 = nn.Parameter(1 * torch.ones(neurons))
+        self.d = nn.Parameter(torch.ones(neurons))
+        self.neurons = neurons
+
+    def forward(self, x):
+        # x.size() = (..., neurons)
+        denomintor = x**2 + self.d ** 2     # size = (..., neurons)
+        term_1 = 10*self.lambda_1 * x  / denomintor
+        term_2 = 10*self.lambda_2 / denomintor
+        return (term_1 + term_2)
+
+
+class CauchyActivation2(nn.Module):
+    """增强型Cauchy激活函数，专注于加速训练和梯度流动"""
+    def __init__(self, dim: int, train_param: bool = True):
+        super(CauchyActivation2, self).__init__()
+        # 使用更大的初始值
+        self.lambda1 = nn.Parameter(torch.ones(1) * 4.0, requires_grad=train_param)
+        self.lambda2 = nn.Parameter(torch.ones(1) * 2.0, requires_grad=train_param)
+        self.d = nn.Parameter(torch.ones(1) * 0.1, requires_grad=train_param)  # 更小的d值使曲线更陡峭
+        
+        # 增加初始缩放因子
+        self.scale = nn.Parameter(torch.ones(1) * 5.0, requires_grad=train_param)
+        
+        # 添加截断参数以避免饱和
+        self.clip_min = nn.Parameter(torch.ones(1) * -0.2, requires_grad=False)
+        self.clip_max = nn.Parameter(torch.ones(1) * 0.2, requires_grad=False)
+
+    def forward(self, x):
+        # 首先裁剪输入范围以避免极端值
+        x = torch.clamp(x, min=-20.0, max=20.0)
+        
+        lambda1 = torch.abs(self.lambda1) + 1e-6
+        lambda2 = torch.abs(self.lambda2) + 1e-6
+        d = torch.abs(self.d) + 1e-6
+        scale = torch.abs(self.scale) + 1e-6
+
+        # 使用平方项而不是完全二次项，提供更温和的非线性
+        denominator = 1.0 + (x**2) / d
+        
+        # 组合两个项
+        result = (lambda1 * x / denominator + lambda2 / denominator) * scale
+        
+        # 添加残差连接，让一些线性信号通过
+        result = result + 0.1 * x
+        
+        # 裁剪输出范围
+        return torch.clamp(result, min=self.clip_min, max=self.clip_max)
+
 class CauchyActivationV3(nn.Module):
     def __init__(self, neurons=768, gamma_init=1.0, beta=0.1, alpha=10.0):
         super().__init__()
@@ -378,7 +431,7 @@ class FeedForward(nn.Module):
         self.w1 = nn.Linear(dim, hidden_dim, bias=False)  # 第一个投影
         self.w2 = nn.Linear(hidden_dim, dim, bias=False)  # 输出投影
         self.w3 = nn.Linear(dim, hidden_dim, bias=False)  # 用于门控机制的投影
-        self.activation= CauchyActivationV6(neurons=hidden_dim)
+        self.activation= CauchyActivation(neurons=hidden_dim)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):
