@@ -310,7 +310,8 @@ if __name__=="__main__":
         )
 
     # 创建保存目录
-    save_dir = os.path.join(out_dir, 'pretrain')
+    # save_dir = os.path.join(out_dir, 'pretrain')
+    save_dir = out_dir
     if not os.path.exists(save_dir): 
         os.makedirs(save_dir, exist_ok=True)
     logger = get_logger(os.path.join(save_dir,'log.log'))  # 初始化日志记录器

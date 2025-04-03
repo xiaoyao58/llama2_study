@@ -242,6 +242,30 @@ class CauchyActivationV5(nn.Module):
         output = pos_gate * pos_part + neg_gate * neg_part
         
         return output
+    
+class CauchyActivationV6(nn.Module):
+    def __init__(self, neurons=768, a_init=0.5, b_init=1.0):
+        super().__init__()
+        self.a = nn.Parameter(torch.full((neurons,), a_init))
+        self.b = nn.Parameter(torch.full((neurons,), b_init))
+        self.transition_scale = nn.Parameter(torch.tensor(10.0))  # 可学习过渡
+        
+    def forward(self, x):
+        a = self.a.abs()
+        b = self.b.abs() + 0.01  # 避免除零
+        
+        # 正半轴（Cauchy CDF）
+        pos_gate = torch.sigmoid(self.transition_scale * x)  # 改用 sigmoid
+        cauchy_cdf = 0.5 + (1 / math.pi) * torch.atan(x / b)
+        pos_part = a * x * cauchy_cdf
+        
+        # 负半轴（改进形式）
+        neg_gate = torch.sigmoid(-self.transition_scale * x)
+        neg_part = (a * x) / (1 + torch.abs(x) / b)  # 更平滑的负半轴
+        
+        # 组合
+        output = pos_gate * pos_part + neg_gate * neg_part
+        return output
 
 class Attention(nn.Module):
     """
@@ -354,7 +378,7 @@ class FeedForward(nn.Module):
         self.w1 = nn.Linear(dim, hidden_dim, bias=False)  # 第一个投影
         self.w2 = nn.Linear(hidden_dim, dim, bias=False)  # 输出投影
         self.w3 = nn.Linear(dim, hidden_dim, bias=False)  # 用于门控机制的投影
-        self.activation= CauchyActivationV5(neurons=hidden_dim)
+        self.activation= CauchyActivationV6(neurons=hidden_dim)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):

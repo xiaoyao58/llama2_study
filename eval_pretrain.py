@@ -17,16 +17,16 @@ import numpy as np
 #                                   smoothing_function=SmoothingFunction().method1,
 #                                   weights=weights) for label, pred in zip(labels, preds)])
 # -----------------------------------------------------------------------------
-out_dir = 'out/cauchy_pretrain_v15/pretrain/epoch_2.pt' # ignored if init_from is not 'resume'
+out_dir = 'out' # ignored if init_from is not 'resume'
 start = "" # or "<|endoftext|>" or etc. Can also specify a file, use as: "FILE:prompt.txt"
 num_samples = 1 # number of samples to draw
-max_new_tokens = 100 # number of tokens generated in each sample
+max_new_tokens = 256 # number of tokens generated in each sample
 temperature = 1.0 # 1.0 = no change, < 1.0 = less random, > 1.0 = more random, in predictions
 top_k = 30 # retain only the top_k most likely tokens, clamp others to have 0 probability
 seed = 1337
 device = 'cuda' if torch.cuda.is_available() else 'cpu' # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1', etc.
 #dtype = 'bfloat16' if torch.cuda.is_available() and torch.cuda.is_bf16_supported() else 'float16' # 'float32' or 'bfloat16' or 'float16'
-dtype = "float32"
+dtype = "float16"
 compile = False # use PyTorch 2.0 to compile the model to be faster
 #exec(open('configurator.py').read()) # overrides from command line or config file
 # -----------------------------------------------------------------------------
@@ -60,7 +60,7 @@ ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torc
 ctx = nullcontext() if device_type == 'cpu' else torch.cuda.amp.autocast()
 
 # init from a model saved in a specific directory
-ckpt_path = 'out/pretrain/epoch_9.pth'
+ckpt_path = 'out/cauchy_pretrain_v16/epoch_2.pth'
 state_dict = torch.load(ckpt_path, map_location=device)
 gptconf = ModelArgs(**model_args)
 model = Transformer(gptconf)
