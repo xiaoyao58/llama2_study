@@ -17,7 +17,7 @@ import numpy as np
 #                                   smoothing_function=SmoothingFunction().method1,
 #                                   weights=weights) for label, pred in zip(labels, preds)])
 # -----------------------------------------------------------------------------
-out_dir = 'out' # ignored if init_from is not 'resume'
+out_dir = 'out/cauchy_pretrain_v15/pretrain/epoch_2.pt' # ignored if init_from is not 'resume'
 start = "" # or "<|endoftext|>" or etc. Can also specify a file, use as: "FILE:prompt.txt"
 num_samples = 1 # number of samples to draw
 max_new_tokens = 100 # number of tokens generated in each sample

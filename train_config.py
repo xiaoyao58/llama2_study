@@ -1,6 +1,6 @@
 pretrain_config = {
-    "out_dir" : 'out',  # 输出目录
-    "max_epoch" : 10,  # 最大训练轮次
+    "out_dir" : 'out/cauchy_pretrain_v15',  # 输出目录
+    "max_epoch" : 3,  # 最大训练轮次
     "eval_interval" : 1,  # 评估间隔
     "log_interval" : 100,  # 日志记录间隔
     "save_interval" : 10000,  # 保存间隔
@@ -10,8 +10,8 @@ pretrain_config = {
     "init_from" : 'scratch',  # 初始化模式：'scratch'（从头开始）, 'resume'（恢复训练）或 'gpt2*'
     
     # 梯度累积相关设置
-    "gradient_accumulation_steps" : 1,  # 用于模拟更大的批量大小
-    "batch_size" : 32,  # 如果gradient_accumulation_steps > 1，这是微批量大小
+    "gradient_accumulation_steps" : 2,  # 用于模拟更大的批量大小
+    "batch_size" : 16,  # 如果gradient_accumulation_steps > 1，这是微批量大小
     
     # 模型参数 - 根据需要更改
     "max_seq_len" : 512,  # 最大序列长度
@@ -47,5 +47,5 @@ pretrain_config = {
     "use_wandb": True,  # 是否使用wandb
     "wandb_project": "llama2_pretrain",  # wandb项目名
     "wandb_entity": None,  # wandb实体（用户名或团队名）
-    "wandb_run_name": "'llama2_pretrain_run",  # wandb运行名
+    "wandb_run_name": "'cauchy_pretrain_v15",  # wandb运行名
 }
