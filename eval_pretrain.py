@@ -60,7 +60,7 @@ ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torc
 ctx = nullcontext() if device_type == 'cpu' else torch.cuda.amp.autocast()
 
 # init from a model saved in a specific directory
-ckpt_path = 'out/cauchy_pretrain_v16/epoch_2.pth'
+ckpt_path = 'out/cauchy_pretrain_v21/epoch_19.pth'
 state_dict = torch.load(ckpt_path, map_location=device)
 gptconf = ModelArgs(**model_args)
 model = Transformer(gptconf)

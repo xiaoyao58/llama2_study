@@ -431,7 +431,7 @@ class FeedForward(nn.Module):
         self.w1 = nn.Linear(dim, hidden_dim, bias=False)  # 第一个投影
         self.w2 = nn.Linear(hidden_dim, dim, bias=False)  # 输出投影
         self.w3 = nn.Linear(dim, hidden_dim, bias=False)  # 用于门控机制的投影
-        self.activation= CauchyActivation(neurons=hidden_dim)
+        self.activation= CauchyActivationV6(neurons=hidden_dim)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, x):

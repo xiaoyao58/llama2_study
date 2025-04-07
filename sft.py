@@ -10,7 +10,7 @@ from model import Transformer, ModelArgs
 from torch.distributed import destroy_process_group, init_process_group
 from torch.nn.parallel import DistributedDataParallel as DDP
 import pandas as pd
-from dataset_sft import SFTDataset
+from dataset_sft import SFTDataset,SFTBinDataset
 import logging
 import json
 import torch.nn.functional as F
@@ -139,7 +139,7 @@ def init_model():
     elif init_from == "resume":
         print(f"Resuming training from {out_dir}")
         # resume training from a checkpoint.
-        ckpt_path = os.path.join(out_dir, "ckpt.pt")
+        ckpt_path = os.path.join(out_dir, "epoch_19.pth")
         checkpoint = torch.load(ckpt_path, map_location=device)
         checkpoint_model_args = checkpoint["model_args"]
         # force these config attributes to be equal otherwise we can't even resume training
@@ -162,14 +162,14 @@ def init_model():
     return model
 # I/O
 if __name__=="__main__":
-    out_dir = 'out'
+    out_dir = 'out/cauchy_pretrain_v21'
     max_epoch = 2
     eval_interval = 1
     log_interval = 50
     eval_iters = 200
     eval_only = False # if True, script exits right after the first eval
     always_save_checkpoint = True # if True, always save a checkpoint after each eval
-    init_from = 'scratch' # 'scratch' or 'resume' or 'gpt2*'
+    init_from = 'resume' # 'scratch' or 'resume' or 'gpt2*'
     #
     gradient_accumulation_steps = 1 # used to simulate larger batch sizes
     batch_size = 32 # if gradient_accumulation_steps > 1, this is the micro-batch size
@@ -197,7 +197,7 @@ if __name__=="__main__":
     # system
     device = 'cuda' # examples: 'cpu', 'cuda', 'cuda:0', 'cuda:1' etc., or try 'mps' on macbooks
     dtype = 'float16' # 'float32', 'bfloat16', or 'float16', the latter will auto implement a GradScaler
-    compile = False # use PyTorch 2.0 to compile the model to be faster
+    compile = True # use PyTorch 2.0 to compile the model to be faster
     # -----------------------------------------------------------------------------
     config_keys = [
         k
@@ -254,7 +254,7 @@ if __name__=="__main__":
     best_val_loss = 1e9
     
     #-----init dataloader------
-    df=pd.read_csv('./sft_data/sft_data.csv')
+    # df=pd.read_csv('./sft_data/sft_data.csv')
     # input=[]
     # target=[]
     # with open('../track1/train_valid.json','r') as f:
@@ -267,10 +267,12 @@ if __name__=="__main__":
     # df['prompt']=input
     # df['answer']=target
     # df=pd.concat((df_sft,df[100:])).reset_index(drop=True)
-    df=df.sample(frac=1.0)
-    print(df)
+    # df=df.sample(frac=1.0)
+    # print(df)
+    # train_ds = SFTDataset(df,tokenizer, max_length=512)
+    train_ds = SFTBinDataset("data/sft_mini_512.bin")
+
     tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
-    train_ds = SFTDataset(df,tokenizer, max_length=512)
     train_loader = torch.utils.data.DataLoader(
         train_ds,
         batch_size=batch_size,
@@ -290,7 +292,7 @@ if __name__=="__main__":
     # )
     #init model
     model=init_model()
-    model.load_state_dict(torch.load('./out/baike_pretrain/epoch_0.pth'))
+    model.load_state_dict(torch.load('./out/cauchy_pretrain_v21/epoch_19.pth'))
     model.to(device)
     # initialize a GradScaler. If enabled=False scaler is a no-op
     scaler = torch.cuda.amp.GradScaler(enabled=(dtype == 'float16'))
