@@ -242,6 +242,7 @@ class SFTBinDataset(Dataset):
         self.lengths_answer = loaded_data['lengths_answer']
         self.num_samples = loaded_data['num_samples']
         self.max_length = max_length
+        self.tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
 
         def calculate_indices(lengths):
             end_indices = np.cumsum(lengths)
@@ -261,15 +262,19 @@ class SFTBinDataset(Dataset):
         answer_ids = self.answer_concatenated[self.start_indices_answer[index]:self.end_indices_answer[index]].tolist()
 
         if len(prompt_ids)+len(answer_ids)>self.max_length-2:
-                half_max_length = self.max_length/2
-                if prompt_ids>half_max_length:
+                prompt = self.tokenizer.decode(prompt_ids)
+                answer = self.tokenizer.decode(answer_ids)
+                print("prompt: "+prompt)
+                print("answer: "+answer)
+                print("="*100)
+                half_max_length = int(self.max_length/2)
+                if len(prompt_ids)>half_max_length:
                     prompt_ids = prompt_ids[:half_max_length-1]
-                if answer_ids>half_max_length:
+                if len(answer_ids)>half_max_length:
                     answer_ids = answer_ids[:half_max_length-1]
         if self.debug:
-            tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
-            prompt = tokenizer.decode(prompt_ids)
-            answer = tokenizer.decode(answer_ids)
+            prompt = self.tokenizer.decode(prompt_ids)
+            answer = self.tokenizer.decode(answer_ids)
             print("prompt: "+prompt)
             print("answer: "+answer)
             print("="*100)
@@ -313,7 +318,10 @@ if __name__=="__main__":
     ConvertJsonlToBin(input_path,output_path)
 
     # 测试创建数据集实例
-    # train_ds = SFTBinDataset("data/sft_mini_512.npz",debug=True)
+    train_ds = SFTBinDataset("data/sft_mini_512.npz",debug=False)
+    for idx,ds in enumerate(train_ds):
+        # print(idx)
+        pass
     # train_ds[0]
     # train_ds[1]
     # train_ds[2]

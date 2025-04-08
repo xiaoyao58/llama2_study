@@ -355,7 +355,7 @@ def print_gpu_memory_stats():
 if __name__ == "__main__":
     # 输出目录和训练配置
     out_dir = 'out/cauchy_pretrain_v21'
-    max_epoch = 2
+    max_epoch = 1
     eval_interval = 1
     log_interval = 50
     eval_iters = 200
@@ -404,7 +404,7 @@ if __name__ == "__main__":
     bias = False  # 是否在LayerNorm和Linear层中使用偏置
     
     # 优化器参数
-    learning_rate = 3e-5  # 最大学习率
+    learning_rate = 1e-5  # 最大学习率
     weight_decay = 1e-4
     beta1 = 0.9
     beta2 = 0.95
