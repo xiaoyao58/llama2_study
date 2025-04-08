@@ -1,5 +1,5 @@
 pretrain_config = {
-    "out_dir" : 'out/cauchy_pretrain_v23',  # 输出目录
+    "out_dir" : 'out/cauchy_pretrain_v24',  # 输出目录
     "max_epoch" : 3,  # 最大训练轮次
     "eval_interval" : 1,  # 评估间隔
     "log_interval" : 100,  # 日志记录间隔
@@ -47,5 +47,5 @@ pretrain_config = {
     "use_wandb": True,  # 是否使用wandb
     "wandb_project": "llama2_pretrain",  # wandb项目名
     "wandb_entity": None,  # wandb实体（用户名或团队名）
-    "wandb_run_name": "'cauchy_pretrain_v23",  # wandb运行名
+    "wandb_run_name": "'cauchy_pretrain_v24",  # wandb运行名
 }
