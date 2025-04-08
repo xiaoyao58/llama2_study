@@ -39,7 +39,7 @@ def process_batch(batch_data, tokenizer):
         results.extend(result)
     return batch_idx, results
 
-def process_pretrain_hq(input_file="pretrain_hq.json", output_file="./data/pretrain_hf.bin", num_processes=None, batch_size=500):
+def process_pretrain_hq(input_file="pretrain_hq.json", output_file="./data/pretrain_hq.bin", num_processes=None, batch_size=512):
     """
     使用多进程处理pretrain_hq.json文件
     
@@ -362,7 +362,7 @@ if __name__=="__main__":
         # './data/wudaocorpus_zh_14.bin',
         # './data/wudaocorpus_zh_15.bin',
         # './data/wudaocorpus_zh_16.bin',
-        './data/pretrain_hf.bin',
+        # './data/pretrain_hf.bin',
     ]
     data_lst=[]
     for data_path in tqdm(data_path_list):

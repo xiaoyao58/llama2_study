@@ -60,7 +60,7 @@ ptdtype = {'float32': torch.float32, 'bfloat16': torch.bfloat16, 'float16': torc
 ctx = nullcontext() if device_type == 'cpu' else torch.cuda.amp.autocast()
 
 # init from a model saved in a specific directory
-ckpt_path = 'out/sft_Llama2-Chinese-92M-v2/epoch_4.pth'
+ckpt_path = 'out/cauchy_pretrain_v21/sft/epoch_0.pth'
 state_dict = torch.load(ckpt_path, map_location=device)
 gptconf = ModelArgs(**model_args)
 model = Transformer(gptconf)
@@ -87,8 +87,8 @@ tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
 #如果有标准答案，可以填到target里面，打开最后几行的注释，计算bleu分数。
 #如果随便测试测试，那就只填你希望问的问题到question里面就可以。
 data = [
-    {"question": "最近我在办公室坐久了会感到头晕，请问这是什么原因?有什么缓解办法吗？", "target": ""},
-    {"question": "前列腺囊肿的症状是什么？", "target": ""},
+    {"question": "请介绍一下自己。", "target": ""},
+    {"question": "推荐一些杭州的特色美食吧。", "target": ""},
     {"question": "请问，世界上最大的动物是什么？", "target": ""},
 ]
 

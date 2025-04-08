@@ -320,6 +320,55 @@ class CauchyActivationV6(nn.Module):
         output = pos_gate * pos_part + neg_gate * neg_part
         return output
 
+class CauchyActivationV7(nn.Module):
+    def __init__(self, neurons=768):
+        super(CauchyActivation, self).__init__()
+        self.coeff = nn.Parameter(torch.ones(neurons))
+        self.lambda_1 = nn.Parameter(0.01 * torch.ones(neurons))
+        self.lambda_2 = nn.Parameter(1 * torch.ones(neurons))
+        self.d = nn.Parameter(torch.ones(neurons))
+        self.neurons = neurons
+
+    def forward(self, x):
+        # x.size() = (..., neurons)
+        denomintor = x**2 + self.d ** 2     # size = (..., neurons)
+        term_1 = self.coeff*self.lambda_1 * x  / denomintor
+        term_2 = self.coeff*self.lambda_2 / denomintor
+        return (term_1 + term_2)
+    
+# 冻结llambda_1
+class CauchyActivationV8(nn.Module):
+    def __init__(self, neurons=768):
+        super(CauchyActivation, self).__init__()
+        self.lambda_1 = nn.Parameter(0.01 * torch.ones(neurons),requires_grad=False)
+        self.lambda_2 = nn.Parameter(1 * torch.ones(neurons))
+        self.d = nn.Parameter(torch.ones(neurons))
+        self.neurons = neurons
+
+    def forward(self, x):
+        # x.size() = (..., neurons)
+        denomintor = x**2 + self.d ** 2     # size = (..., neurons)
+        term_1 = self.lambda_1 * x  / denomintor
+        term_2 = self.lambda_2 / denomintor
+        return (term_1 + term_2)
+
+# 冻结d
+class CauchyActivationV8(nn.Module):
+    def __init__(self, neurons=768):
+        super(CauchyActivation, self).__init__()
+        self.lambda_1 = nn.Parameter(0.01 * torch.ones(neurons))
+        self.lambda_2 = nn.Parameter(1 * torch.ones(neurons))
+        self.d = nn.Parameter(torch.ones(neurons),requires_grad=False)
+        self.neurons = neurons
+
+    def forward(self, x):
+        # x.size() = (..., neurons)
+        denomintor = x**2 + self.d ** 2     # size = (..., neurons)
+        term_1 = self.lambda_1 * x  / denomintor
+        term_2 = self.lambda_2 / denomintor
+        return (term_1 + term_2)
+
+
 class Attention(nn.Module):
     """
     多头注意力机制，支持分组查询注意力（GQA）

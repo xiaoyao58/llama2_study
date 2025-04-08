@@ -76,6 +76,11 @@ if compile:
     print("Compiling the model...")
     model = torch.compile(model) # requires PyTorch 2.0 (optional)
 
+# Print model structure and parameters
+print(f"\nModel Structure:")
+print(model)
+print(f"\nTotal Parameters: {sum(p.numel() for p in model.parameters())/1e6:.2f}M")
+
 # load the tokenizer
 tokenizer=ChatGLMTokenizer(vocab_file='./chatglm_tokenizer/tokenizer.model')
 #
